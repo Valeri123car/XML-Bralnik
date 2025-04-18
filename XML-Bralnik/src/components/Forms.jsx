@@ -66,12 +66,49 @@ function Forms({ index = 0 }) {
     return count;
   };
 
-  const countTockeChanges = (tocke, type) => {
+  // New function to extract all parcels that are components in cadastral procedures
+  const extractAllParcels = (xmlDoc, jsonData) => {
+    // Get all parcel components from katastrskiPostopek
+    const katastrskiPostopki = xmlDoc.getElementsByTagName("katastrskiPostopek");
+    const parcelEidsInKP = new Set();
+    
+    // Collect all parcel EIDs that start with "1001"
+    Array.from(katastrskiPostopki).forEach(postopek => {
+      const sestavine = postopek.getElementsByTagName("sestavina");
+      
+      Array.from(sestavine).forEach(sestavina => {
+        const sestavinaEid = sestavina.getElementsByTagName("sestavinaEid")[0]?.textContent.trim();
+        if (sestavinaEid && sestavinaEid.startsWith("1001")) {
+          parcelEidsInKP.add(sestavinaEid);
+        }
+      });
+    });
+    
+    // Find matching parcels in JSON data and format them as "sifKo stevilkaParcele"
+    const parcele = jsonData.data.parcele?.parcele || [];
+    const formattedParcels = [];
+    
+    parcele.forEach(parcela => {
+      // Check if this parcel is in our set of components
+      // Note: We might need to format the EID to match the format in JSON data
+      const parcelaEidStr = parcela.parcelaEid.toString();
+      
+      // If this parcel is in our cadastral procedures or if we want all parcels
+      // For now, including all parcels since the mapping between sestavinaEid and parcelaEid may need adjustment
+      if (parcelaEidStr) {
+        formattedParcels.push(`${parcela.sifKo} ${parcela.stevilkaParcele}`);
+      }
+    });
+    
+    return formattedParcels.join(", ");
+  };
+
+  const countTockeChanges = (items, type) => {
     let count = 0;
     
-    if (Array.isArray(tocke)) {
-      tocke.forEach(tocka => {
-        if (tocka.sprememba === type) {
+    if (Array.isArray(items)) {
+      items.forEach(item => {
+        if (item && item.sprememba === type) {
           count += 1;
         }
       });
@@ -81,14 +118,53 @@ function Forms({ index = 0 }) {
   };
 
   const extractJsonFromCdata = (xmlDoc) => {
-    const datotekaElement = xmlDoc.getElementsByTagName("datoteka")[0];
-    const cdataContent = datotekaElement ? datotekaElement.textContent.trim() : '';
-    try {
-      return JSON.parse(cdataContent);
-    } catch (error) {
-      console.error("Error parsing JSON from CDATA:", error);
-      return null;
+    const datotekaElements = xmlDoc.getElementsByTagName("datoteka");
+    
+    if (!datotekaElements || datotekaElements.length === 0) {
+      return { 
+        types: [],
+        data: {} 
+      };
     }
+    
+    const result = {
+      types: [],     
+      data: {}       
+    };
+    
+    Array.from(datotekaElements).forEach((element, index) => {
+      const cdataContent = element.textContent.trim();
+      
+      try {
+        const parsedData = JSON.parse(cdataContent);
+        
+        if (parsedData && parsedData.tip && parsedData.podatki) {
+          const dataType = parsedData.tip;
+          
+          if (!result.types.includes(dataType)) {
+            result.types.push(dataType);
+            
+            result.data[dataType] = {};
+          }
+          
+          Object.keys(parsedData.podatki).forEach(key => {
+            if (Array.isArray(parsedData.podatki[key])) {
+              if (!result.data[dataType][key]) {
+                result.data[dataType][key] = [];
+              }
+              
+              result.data[dataType][key] = [
+                ...result.data[dataType][key],
+                ...parsedData.podatki[key]
+              ];
+            }
+          });
+        }
+      } catch (error) {
+      }
+    });
+    
+    return result;
   };
 
   const xmlDoc = currentFile.xmlContent;
@@ -102,21 +178,101 @@ function Forms({ index = 0 }) {
 
   const jsonData = extractJsonFromCdata(xmlDoc);
   
-  const tocke = jsonData ? jsonData.podatki.tocke : [];
+  // Extract all parcels that are components in cadastral procedures
+  const allParcelsInKP = extractAllParcels(xmlDoc, jsonData);
+
+  const tocke = [];
+  if (jsonData.data.tocke) {
+    Object.keys(jsonData.data).forEach(dataType => {
+      if (jsonData.data[dataType].tocke && Array.isArray(jsonData.data[dataType].tocke)) {
+        tocke.push(...jsonData.data[dataType].tocke);
+      }
+    });
+  }
   const changedPoints = countTockeChanges(tocke, "S");
   const addedPoints = countTockeChanges(tocke, "D");
   const deletedPoints = countTockeChanges(tocke, "B");
 
-  const daljica = jsonData ? jsonData.podatki.daljice : [];
-  const spremenjenaDaljica = countTockeChanges(daljica, "S");
-  const dodanaDaljica = countTockeChanges(daljica, "D");
-  const izbrisanaDaljica = countTockeChanges(daljica, "B");
+  const daljice = [];
+  if (jsonData.data.daljice || jsonData.data.tocke) {
+    Object.keys(jsonData.data).forEach(dataType => {
+      if (jsonData.data[dataType].daljice && Array.isArray(jsonData.data[dataType].daljice)) {
+        daljice.push(...jsonData.data[dataType].daljice);
+      }
+    });
+  }
+  const spremenjenaDaljica = countTockeChanges(daljice, "S");
+  const dodanaDaljica = countTockeChanges(daljice, "D");
+  const izbrisanaDaljica = countTockeChanges(daljice, "B");
 
-  const parcele = jsonData ? jsonData.podatki.parcele : [];
+  const parcele = jsonData.data.parcele?.parcele || [];
   const neSpremenjenaParc = countTockeChanges(parcele, "N");
   const spremenjenaParc = countTockeChanges(parcele, "S");
   const dodaneParc = countTockeChanges(parcele, "D");
   const parcDel = countTockeChanges(parcele, "B");
+  
+  const rpe = jsonData.data.RPE || {};
+  
+  const preseki = jsonData.data.preseki || {};
+  
+  const zgodovina = jsonData.data.zgodovina || {};
+  
+  const stavbe = jsonData.data.stavbe?.stavbe || [];
+  const stavbeSpremenjene = countTockeChanges(stavbe, "S");
+  const stavbDodanih = countTockeChanges(stavbe, "D");
+  const stavbDel = countTockeChanges(stavbe, "B");
+  const stavbNeSpremenjene = countTockeChanges(stavbe, "N");
+
+  const deliStavb = jsonData.data.stavbe?.deliStavb || [];
+  const deliStvSpre = countTockeChanges(deliStavb, "S");
+  const deliStvDodanih = countTockeChanges(deliStavb, "D");
+  const deliStvDel = countTockeChanges(deliStavb, "B");
+  const deliStvNespre = countTockeChanges(deliStavb, "N");
+
+  const estaza = jsonData.data.stavbe?.etaze || [];
+  const estazaSpre = countTockeChanges(estaza, "S");
+  const estazaDodanih = countTockeChanges(estaza, "D");
+  const estazaDel = countTockeChanges(estaza, "B");
+  const estazaNespre = countTockeChanges(estaza, "N");
+
+  const prostori = jsonData.data.stavbe?.prostori || [];
+  const prostoriSpre = countTockeChanges(prostori, "S");
+  const prostoriDodani = countTockeChanges(prostori, "D");
+  const prostoriDel = countTockeChanges(prostori, "B");
+  const prostoriNeSpre = countTockeChanges(prostori, "N");
+
+  const lastniki = jsonData.data.lastnikiUpravljavciUpravniki?.imetnikLastnistva || [];
+  
+
+  // Fix: Look for sestavineDelovStavb directly in the podatki object
+  const sestaDelStavb = [];
+  Object.keys(jsonData.data).forEach(dataType => {
+    if (jsonData.data[dataType]?.sestavineDelovStavb && Array.isArray(jsonData.data[dataType].sestavineDelovStavb)) {
+      sestaDelStavb.push(...jsonData.data[dataType].sestavineDelovStavb);
+    }
+  });
+  
+  const sestaDelStavSpre = countTockeChanges(sestaDelStavb, "S");
+  const sestaDelStavDodani = countTockeChanges(sestaDelStavb, "D");
+  const sestaDelStavDel = countTockeChanges(sestaDelStavb, "B");
+  const sestaDelStavNeSpr = countTockeChanges(sestaDelStavb, "N");
+
+  const bonitete = jsonData.data.bonitete?.obmocjaBonitet || [];
+  const bonitetaSpr = countTockeChanges(bonitete, "S");
+  const bonitetaDodanih = countTockeChanges(bonitete, "D");
+  const bonitetaDel = countTockeChanges(bonitete, "B");
+  const bonitetaO = countTockeChanges(bonitete, "O");
+
+  const tockeMeritev = jsonData.data.bonitete?.tockeMeritev || [];
+  const tockeMeritevSpre = countTockeChanges(tockeMeritev, "S");
+  const tockeMeritevDoda = countTockeChanges(tockeMeritev, "D")
+  const tockeMeritevDel = countTockeChanges(tockeMeritev, "B")
+
+  const obmocjeSppEid = jsonData.data.parcele?.obmocjaSpp || [];
+  const obmocjeSppSpre = countTockeChanges(obmocjeSppEid, "S")
+  const obmocjeSppDodan = countTockeChanges(obmocjeSppEid, "D")
+  const obmocjeSppDel = countTockeChanges(obmocjeSppEid, "B")
+
   return (
     <div className="forms">
       <div className="form-box">
@@ -125,6 +281,7 @@ function Forms({ index = 0 }) {
         </div>
       </div>
       <div className="form-box">
+        <p><strong>Found data types:</strong> {jsonData.types.join(", ")}</p>
         <p><strong>Pooblaščenec ID:</strong> {pooblascenecId}</p>
         <p><strong>Število katastrskih postopkov:</strong> {numKP}</p>
         <p><strong>VrstaKatPos:</strong> {vrstaKatPos.length > 0 ? vrstaKatPos.join(", ") : "Ni podatkov"}</p>
@@ -132,9 +289,18 @@ function Forms({ index = 0 }) {
         <p><strong>Število sestavin stavb:</strong> {buildingCount}</p>
         <p><strong>Število sestavin delov stavb:</strong> {buildingPartCount}</p>
         <p><strong>Število sestavin bonitet:</strong> {boniteta}</p>
+        <p><strong>Seznam vseh parcel (sifKo stevilkaParcele):</strong> {allParcelsInKP}</p>
+        <p>OBMOCJE S: {obmocjeSppSpre} D: {obmocjeSppDodan} B: {obmocjeSppDel}</p>
+        <p>BONITETE S: {bonitetaSpr} D: {bonitetaDodanih} B: {bonitetaDel} O: {bonitetaO}</p>
         <p>TOČKE S: {changedPoints} D: {addedPoints} B: {deletedPoints}</p>
         <p>DALJICE S: {spremenjenaDaljica} D: {dodanaDaljica} B: {izbrisanaDaljica}</p>
         <p>PARCELE N: {neSpremenjenaParc} S: {spremenjenaParc} D: {dodaneParc} B: {parcDel}</p>
+        <p>STAVBE N: {stavbNeSpremenjene} S: {stavbeSpremenjene} D: {stavbDodanih} B: {stavbDel}</p>
+        <p>DELI STAVBE N: {deliStvNespre} S: {deliStvSpre} D: {deliStvDodanih} B: {deliStvDel}</p> 
+        <p>ETAZA N: {estazaNespre} S: {estazaSpre} D: {estazaDodanih} B: {estazaDel}</p>
+        <p>PROSTORI N: {prostoriNeSpre} S: {prostoriSpre} D: {prostoriDodani} B: {prostoriDel}</p>
+        <p>SESTAVINE DELOV STAVB N: {sestaDelStavNeSpr} S: {sestaDelStavSpre} D: {sestaDelStavDodani} B:{sestaDelStavDel}</p>
+        <p>TOCKE MERITEV S: {tockeMeritevSpre} D: {tockeMeritevDoda} B: {tockeMeritevDel}</p>
       </div>
     </div>
   );
