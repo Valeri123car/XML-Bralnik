@@ -33,19 +33,20 @@
       "node_modules/**/*",
       "package.json"
     ],
-    "nsis":{
+    "nsis": {
       "uninstallDisplayName": "Uninstall this app.",
       "license": "licence.txt",
       "oneClick": false,
       "allowToChangeInstallationDirectory": true
     },
     "win": {
-    "target": "nsis",
-    "icon": "GZCeljeZK.ico"
-  }
+      "target": "nsis",
+      "icon": "GZCeljeZK.ico"
+    }
   },
   "dependencies": {
     "file-saver": "^2.0.5",
+    "papaparse": "^5.5.2",
     "pdfjs-dist": "^4.10.38",
     "react-modal": "^3.16.3",
     "react-pdf": "^9.2.1",
