@@ -100,6 +100,8 @@ function DragAndDrop({ setNumForms }) {
 
   return (
     <div className="dragAndDrop">
+      
+      <div className="reset">CTRL+R</div>
       <div className="folder-path-section">
         <div className="folder-path-container">
           <div className="folder-path-display">

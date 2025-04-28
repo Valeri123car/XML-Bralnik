@@ -12,7 +12,7 @@ furnished to do so, subject to the following conditions:
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
 
-This application is built using Electron React Boilerplate
+This application is built using Electron React
 (https://github.com/Valeri123car/XML-Bralnik),
 which is licensed under the MIT License.
 

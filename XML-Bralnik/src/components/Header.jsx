@@ -3,8 +3,10 @@ import "./components.css"
 
 function Header(){
     return(
-        <div className="header">
-        <img src={gzdc} alt='GZ-Celje'/>
+        <div className="header_main">
+            <div className="header">
+                <img src={gzdc} alt='GZ-Celje'/>
+            </div>
         </div>
     );
 }

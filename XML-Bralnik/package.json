@@ -41,7 +41,7 @@
     },
     "win": {
       "target": "nsis",
-      "icon": "GZCeljeZK.ico"
+      "icon": "GZCeljeXML.ico"
     }
   },
   "dependencies": {

@@ -128,7 +128,7 @@ function Export() {
           }
         }
       } catch (err) {
-        alert("No existing file found or error reading file, creating new file", err);
+        console.log("No existing file found or error reading file, creating new file", err);
       }
       
       // Process each XML's data
@@ -149,13 +149,13 @@ function Export() {
         const row = {
           'File Name': data.fileName || '',
           'Data Types': data.dataTypes || '',
-          'Pooblaščenec ID': data.pooblascenecId || '',
-          'Število katastrskih postopkov': ensureNumericValue(data.numKP),
+          'Pooblascenec ID': data.pooblascenecId || '',
+          'Stevilo katastrskih postopkov': ensureNumericValue(data.numKP),
           'VrstaKatPos': data.vrstaKatPos || '',
-          'Število sestavin parcel': ensureNumericValue(data.parcelCount),
-          'Število sestavin stavb': ensureNumericValue(data.buildingCount),
-          'Število sestavin delov stavb': ensureNumericValue(data.buildingPartCount),
-          'Število sestavin bonitet': ensureNumericValue(data.boniteta),
+          'Stevilo sestavin parcel': ensureNumericValue(data.parcelCount),
+          'Stevilo sestavin stavb': ensureNumericValue(data.buildingCount),
+          'Stevilo sestavin delov stavb': ensureNumericValue(data.buildingPartCount),
+          'Stevilo sestavin bonitet': ensureNumericValue(data.boniteta),
           'Seznam vseh parcel': data.allParcelsInKP || '',
           'Seznam vseh stavb': data.allStavbe || '',
           'Seznam vseh bonitet': data.allBonitete || '',
@@ -170,9 +170,9 @@ function Export() {
           'BONITETE - B': ensureNumericValue(data.bonitetaDel), 
           'BONITETE - O': ensureNumericValue(data.bonitetaO),
           
-          'TOČKE - S': ensureNumericValue(data.tockeS),
-          'TOČKE - D': ensureNumericValue(data.tockeD),
-          'TOČKE - B': ensureNumericValue(data.tockeB),
+          'TOCKE - S': ensureNumericValue(data.tockeS),
+          'TOCKE - D': ensureNumericValue(data.tockeD),
+          'TOCKE - B': ensureNumericValue(data.tockeB),
           
           'DALJICE - S': ensureNumericValue(data.daljiceS),
           'DALJICE - D': ensureNumericValue(data.daljiceD),

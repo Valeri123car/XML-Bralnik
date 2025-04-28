@@ -578,29 +578,21 @@ function Forms({ index = 0 }) {
   // Add render part for UI display
   if (loading || !currentFile) {
     return (
-      <div className="forms">
+      <></>
+      /*<div className="forms">
         <div className="loading-message">
           <p>Please select XML files and click "Process Data" to view content for Form #{index + 1}.</p>
         </div>
       </div>
+      */
     );
   }
 
   const xmlDoc = currentFile.xmlContent;
-  const pooblascenecId = getTextContentByTag(xmlDoc, "pooblascenecId");
-  const numKP = countKatastrskiPostopki(xmlDoc);
-  const vrstaKatPos = getVrstaKatPos(xmlDoc, "vrstaKatastrskegaPostopka");
-  const parcelCount = vsotaEid(xmlDoc, "1001");
-  const buildingCount = vsotaEid(xmlDoc, "1002");
-  const buildingPartCount = vsotaEid(xmlDoc, "1003");
-  const boniteta = vsotaEid(xmlDoc, "1201");
-
   const jsonData = extractJsonFromCdata(xmlDoc);
   
   // Extract all parcels that are components in cadastral procedures
-  const allParcelsInKP = extractAllParcels(xmlDoc, jsonData);
-  const allStavbe = eAllStavbe(xmlDoc, jsonData);
-  const allBonitete = extractAllBonitete(xmlDoc, jsonData);
+
 
   const tocke = [];
   if (jsonData.data.tocke) {
@@ -610,9 +602,6 @@ function Forms({ index = 0 }) {
       }
     });
   }
-  const changedPoints = countTockeChanges(tocke, "S");
-  const addedPoints = countTockeChanges(tocke, "D");
-  const deletedPoints = countTockeChanges(tocke, "B");
 
   const daljice = [];
   if (jsonData.data.daljice || jsonData.data.tocke) {
@@ -622,39 +611,7 @@ function Forms({ index = 0 }) {
       }
     });
   }
-  const spremenjenaDaljica = countTockeChanges(daljice, "S");
-  const dodanaDaljica = countTockeChanges(daljice, "D");
-  const izbrisanaDaljica = countTockeChanges(daljice, "B");
 
-  const parcele = jsonData.data.parcele?.parcele || [];
-  const neSpremenjenaParc = countTockeChanges(parcele, "N");
-  const spremenjenaParc = countTockeChanges(parcele, "S");
-  const dodaneParc = countTockeChanges(parcele, "D");
-  const parcDel = countTockeChanges(parcele, "B");
-  
-  const stavbe = jsonData.data.stavbe?.stavbe || [];
-  const stavbeSpremenjene = countTockeChanges(stavbe, "S");
-  const stavbDodanih = countTockeChanges(stavbe, "D");
-  const stavbDel = countTockeChanges(stavbe, "B");
-  const stavbNeSpremenjene = countTockeChanges(stavbe, "N");
-
-  const deliStavb = jsonData.data.stavbe?.deliStavb || [];
-  const deliStvSpre = countTockeChanges(deliStavb, "S");
-  const deliStvDodanih = countTockeChanges(deliStavb, "D");
-  const deliStvDel = countTockeChanges(deliStavb, "B");
-  const deliStvNespre = countTockeChanges(deliStavb, "N");
-
-  const estaza = jsonData.data.stavbe?.etaze || [];
-  const estazaSpre = countTockeChanges(estaza, "S");
-  const estazaDodanih = countTockeChanges(estaza, "D");
-  const estazaDel = countTockeChanges(estaza, "B");
-  const estazaNespre = countTockeChanges(estaza, "N");
-
-  const prostori = jsonData.data.stavbe?.prostori || [];
-  const prostoriSpre = countTockeChanges(prostori, "S");
-  const prostoriDodani = countTockeChanges(prostori, "D");
-  const prostoriDel = countTockeChanges(prostori, "B");
-  const prostoriNeSpre = countTockeChanges(prostori, "N");
 
   // Fix: Look for sestavineDelovStavb directly in the podatki object
   const sestaDelStavb = [];
@@ -664,30 +621,11 @@ function Forms({ index = 0 }) {
     }
   });
   
-  const sestaDelStavSpre = countTockeChanges(sestaDelStavb, "S");
-  const sestaDelStavDodani = countTockeChanges(sestaDelStavb, "D");
-  const sestaDelStavDel = countTockeChanges(sestaDelStavb, "B");
-  const sestaDelStavNeSpr = countTockeChanges(sestaDelStavb, "N");
-
-  const bonitete = jsonData.data.bonitete?.obmocjaBonitet || [];
-  const bonitetaSpr = countTockeChanges(bonitete, "S");
-  const bonitetaDodanih = countTockeChanges(bonitete, "D");
-  const bonitetaDel = countTockeChanges(bonitete, "B");
-  const bonitetaO = countTockeChanges(bonitete, "O");
-
-  const tockeMeritev = jsonData.data.bonitete?.tockeMeritev || [];
-  const tockeMeritevSpre = countTockeChanges(tockeMeritev, "S");
-  const tockeMeritevDoda = countTockeChanges(tockeMeritev, "D")
-  const tockeMeritevDel = countTockeChanges(tockeMeritev, "B")
-
-  const obmocjeSppEid = jsonData.data.parcele?.obmocjaSpp || [];
-  const obmocjeSppSpre = countTockeChanges(obmocjeSppEid, "S")
-  const obmocjeSppDodan = countTockeChanges(obmocjeSppEid, "D")
-  const obmocjeSppDel = countTockeChanges(obmocjeSppEid, "B")
 
   // Add the render part
   return (
-    <div className="forms">
+    <></>
+    /*<div className="forms">
       <div className="form-box">
         <div className="form-header">
           <h3>Form #{index + 1}: {currentFile.fileName}</h3>
@@ -718,6 +656,7 @@ function Forms({ index = 0 }) {
         <p>TOCKE MERITEV S: {tockeMeritevSpre} D: {tockeMeritevDoda} B: {tockeMeritevDel}</p>
       </div>
     </div>
+    */
   );
 }
 

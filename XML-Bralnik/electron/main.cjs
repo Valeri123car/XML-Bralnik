@@ -6,13 +6,13 @@ function createWindow() {
   const mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
-    icon: __dirname + "gzcZK.ico",
+    icon: __dirname + "GZCeljeXML.ico",
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
-      devTools: true,
+      devTools: false,
     },
-    autoHideMenuBar: false,
+    autoHideMenuBar: true,
   });
 
   mainWindow.loadFile(path.join(__dirname, "../dist/index.html"));
