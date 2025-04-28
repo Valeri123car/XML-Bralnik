@@ -94,15 +94,12 @@ function Forms({ index = 0 }) {
       const eid = element.textContent.trim();
       if (eid.startsWith("1002")) {
         stavbaEidsInKP.add(eid);
-        console.log("Found sestavinaEid starting with 1002:", eid);
       }
     });
     
-    console.log("All sestavinaEids in set:", [...stavbaEidsInKP]);
     
     // If no matching IDs found, return early
     if (stavbaEidsInKP.size === 0) {
-      console.log("No sestavinaEid starting with 1002 found");
       return "";
     }
     
@@ -111,11 +108,9 @@ function Forms({ index = 0 }) {
     const matchedBuildingInfo = new Map();
     
     if (stavbeTags.length > 0) {
-      console.log(`Found ${stavbeTags.length} <stavbe> tag(s)`);
       
       // Process each <stavbe> tag
       Array.from(stavbeTags).forEach((stavbeTag, index) => {
-        console.log(`Processing <stavbe> tag #${index + 1}`);
         
         // Get the text content of the stavbe tag
         const stavbeContent = stavbeTag.textContent || "";
@@ -126,7 +121,6 @@ function Forms({ index = 0 }) {
           if (!matchedBuildingInfo.has(eid)) {
             // Look for the building ID in the stavbe content
             if (stavbeContent.includes(eid)) {
-              console.log(`Found content containing building ID ${eid}`);
               
               // Extract a chunk of text around the building ID
               const startIndex = Math.max(0, stavbeContent.indexOf(eid) - 100);
@@ -141,7 +135,6 @@ function Forms({ index = 0 }) {
                 const sifKo = sifKoMatch[1];
                 const stevilkaStavbe = stevilkaStavbeMatch[1];
                 
-                console.log(`Found matching info for building ${eid}: sifKo=${sifKo}, stevilkaStavbe=${stevilkaStavbe}`);
                 matchedBuildingInfo.set(eid, { sifKo, stevilkaStavbe });
               }
             }
@@ -149,14 +142,12 @@ function Forms({ index = 0 }) {
         }
       });
     } else {
-      console.log("No <stavbe> tag found in the document");
       
       // If we can't find <stavbe> tag, try finding the information in the entire document
       const docContent = xmlDoc.documentElement.textContent || "";
       
       for (const eid of stavbaEidsInKP) {
         if (docContent.includes(eid)) {
-          console.log(`Found building ID ${eid} in document content`);
           
           // Extract context around the building ID
           const startIndex = Math.max(0, docContent.indexOf(eid) - 100);
@@ -171,7 +162,6 @@ function Forms({ index = 0 }) {
             const sifKo = sifKoMatch[1];
             const stevilkaStavbe = stevilkaStavbeMatch[1];
             
-            console.log(`Found matching info for building ${eid}: sifKo=${sifKo}, stevilkaStavbe=${stevilkaStavbe}`);
             matchedBuildingInfo.set(eid, { sifKo, stevilkaStavbe });
           }
         }
@@ -180,7 +170,6 @@ function Forms({ index = 0 }) {
     
     // Try another approach using format search if we still haven't found all buildings
     if (matchedBuildingInfo.size < stavbaEidsInKP.size) {
-      console.log("Trying alternative format search...");
       
       // Look for building information in specific formats
       const docContent = xmlDoc.documentElement.textContent || "";
@@ -195,7 +184,6 @@ function Forms({ index = 0 }) {
             const sifKo = match[1];
             const stevilkaStavbe = match[2];
             
-            console.log(`Found matching info using alternative search for building ${eid}: sifKo=${sifKo}, stevilkaStavbe=${stevilkaStavbe}`);
             matchedBuildingInfo.set(eid, { sifKo, stevilkaStavbe });
           }
         }
@@ -204,7 +192,6 @@ function Forms({ index = 0 }) {
     
     // Try one last approach with even more generic pattern matching
     if (matchedBuildingInfo.size < stavbaEidsInKP.size) {
-      console.log("Trying generic pattern matching as last resort...");
       const docContent = xmlDoc.documentElement.textContent || "";
       
       for (const eid of stavbaEidsInKP) {
@@ -243,7 +230,6 @@ function Forms({ index = 0 }) {
               }
               
               if (sifKo && stevilkaStavbe) {
-                console.log(`Found matching info using generic pattern for building ${eid}: sifKo=${sifKo}, stevilkaStavbe=${stevilkaStavbe}`);
                 matchedBuildingInfo.set(eid, { sifKo, stevilkaStavbe });
                 break; // Break out of pattern loop once we've found a match
               }
@@ -255,7 +241,6 @@ function Forms({ index = 0 }) {
   
     // Look through all datoteka elements for JSON content
     if (matchedBuildingInfo.size < stavbaEidsInKP.size) {
-      console.log("Searching through all datoteka elements...");
       const datotekaTags = xmlDoc.getElementsByTagName("datoteka");
       
       Array.from(datotekaTags).forEach((datotekaTag, index) => {
@@ -284,7 +269,6 @@ function Forms({ index = 0 }) {
                       const stevilkaStavbe = stavba.stevilkaStavbe;
                       
                       if (sifKo !== undefined && stevilkaStavbe !== undefined) {
-                        console.log(`Found info in JSON for building ${stavbaEid}: sifKo=${sifKo}, stevilkaStavbe=${stevilkaStavbe}`);
                         matchedBuildingInfo.set(stavbaEid, { sifKo, stevilkaStavbe });
                       }
                     }
@@ -306,13 +290,6 @@ function Forms({ index = 0 }) {
     for (const [eid, info] of matchedBuildingInfo.entries()) {
       const formatted = `${info.sifKo}-${info.stevilkaStavbe}`;
       resultStrings.push(formatted);
-      console.log(`Added to result: ${formatted} (from building ${eid})`);
-    }
-    
-    if (resultStrings.length === 0) {
-      console.log("Warning: Could not find matching building information. Returning empty result.");
-    } else {
-      console.log("Final matched stavbe (formatted):", resultStrings);
     }
     
     return resultStrings.join(", ");
@@ -525,6 +502,7 @@ function Forms({ index = 0 }) {
       const obmocjeSppDel = countTockeChanges(obmocjeSppEid, "B");
       
       // Create the formatted data object to update in context
+      // Create the formatted data object to update in context
       const formattedData = {
         fileName: currentFile.fileName,
         dataTypes: jsonData.types.join(", "),
@@ -538,17 +516,58 @@ function Forms({ index = 0 }) {
         allParcelsInKP: allParcelsInKP || "",
         allStavbe: allStavbe || "",
         allBonitete: allBonitete || "",
-        obmocje: `S: ${obmocjeSppSpre || 0}, D: ${obmocjeSppDodan || 0}, B: ${obmocjeSppDel || 0}`,
-        bonitete: `S: ${bonitetaSpr || 0}, D: ${bonitetaDodanih || 0}, B: ${bonitetaDel || 0}, O: ${bonitetaO || 0}`,
-        tocke: `S: ${changedPoints || 0}, D: ${addedPoints || 0}, B: ${deletedPoints || 0}`,
-        daljice: `S: ${spremenjenaDaljica || 0}, D: ${dodanaDaljica || 0}, B: ${izbrisanaDaljica || 0}`,
-        parcele: `N: ${neSpremenjenaParc || 0}, S: ${spremenjenaParc || 0}, D: ${dodaneParc || 0}, B: ${parcDel || 0}`,
-        stavbe: `N: ${stavbNeSpremenjene || 0}, S: ${stavbeSpremenjene || 0}, D: ${stavbDodanih || 0}, B: ${stavbDel || 0}`,
-        deliStavb: `N: ${deliStvNespre || 0}, S: ${deliStvSpre || 0}, D: ${deliStvDodanih || 0}, B: ${deliStvDel || 0}`,
-        etaza: `N: ${estazaNespre || 0}, S: ${estazaSpre || 0}, D: ${estazaDodanih || 0}, B: ${estazaDel || 0}`,
-        prostori: `N: ${prostoriNeSpre || 0}, S: ${prostoriSpre || 0}, D: ${prostoriDodani || 0}, B: ${prostoriDel || 0}`,
-        sestavineDelovStavb: `N: ${sestaDelStavNeSpr || 0}, S: ${sestaDelStavSpre || 0}, D: ${sestaDelStavDodani || 0}, B: ${sestaDelStavDel || 0}`,
-        tockeMeritev: `S: ${tockeMeritevSpre || 0}, D: ${tockeMeritevDoda || 0}, B: ${tockeMeritevDel || 0}`
+        
+        // Store individual values separately
+        obmocjeSppSpre: obmocjeSppSpre || 0,
+        obmocjeSppDodan: obmocjeSppDodan || 0,
+        obmocjeSppDel: obmocjeSppDel || 0,
+        
+        bonitetaSpr: bonitetaSpr || 0,
+        bonitetaDodanih: bonitetaDodanih || 0,
+        bonitetaDel: bonitetaDel || 0,
+        bonitetaO: bonitetaO || 0,
+        
+        tockeS: changedPoints || 0,
+        tockeD: addedPoints || 0,
+        tockeB: deletedPoints || 0,
+        
+        daljiceS: spremenjenaDaljica || 0,
+        daljiceD: dodanaDaljica || 0,
+        daljiceB: izbrisanaDaljica || 0,
+        
+        parceleN: neSpremenjenaParc || 0,
+        parceleS: spremenjenaParc || 0,
+        parceleD: dodaneParc || 0,
+        parceleB: parcDel || 0,
+        
+        stavbeN: stavbNeSpremenjene || 0,
+        stavbeS: stavbeSpremenjene || 0,
+        stavbeD: stavbDodanih || 0,
+        stavbeB: stavbDel || 0,
+        
+        deliStavbN: deliStvNespre || 0,
+        deliStavbS: deliStvSpre || 0,
+        deliStavbD: deliStvDodanih || 0,
+        deliStavbB: deliStvDel || 0,
+        
+        etazaN: estazaNespre || 0,
+        etazaS: estazaSpre || 0,
+        etazaD: estazaDodanih || 0,
+        etazaB: estazaDel || 0,
+        
+        prostoriN: prostoriNeSpre || 0,
+        prostoriS: prostoriSpre || 0,
+        prostoriD: prostoriDodani || 0,
+        prostoriB: prostoriDel || 0,
+        
+        sestavineDelovStavbN: sestaDelStavNeSpr || 0,
+        sestavineDelovStavbS: sestaDelStavSpre || 0,
+        sestavineDelovStavbD: sestaDelStavDodani || 0,
+        sestavineDelovStavbB: sestaDelStavDel || 0,
+        
+        tockeMeritevS: tockeMeritevSpre || 0,
+        tockeMeritevD: tockeMeritevDoda || 0,
+        tockeMeritevB: tockeMeritevDel || 0
       };
       
       // Update the form data in context

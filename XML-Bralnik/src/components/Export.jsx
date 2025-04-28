@@ -29,6 +29,8 @@ function Export() {
 
     try {
       const fileName = 'xml_data_export.csv';
+      
+      // Define all field headers
       const headers = [
         'File Name',
         'Data Types',
@@ -42,17 +44,58 @@ function Export() {
         'Seznam vseh parcel',
         'Seznam vseh stavb',
         'Seznam vseh bonitet',
-        'OBMOCJE',
-        'BONITETE',
-        'TOČKE',
-        'DALJICE',
-        'PARCELE',
-        'STAVBE',
-        'DELI STAVBE',
-        'ETAZA',
-        'PROSTORI',
-        'SESTAVINE DELOV STAVB',
-        'TOCKE MERITEV',
+        // OBMOCJE - individual fields
+        'OBMOCJE - S',
+        'OBMOCJE - D',
+        'OBMOCJE - B',
+        // BONITETE - individual fields
+        'BONITETE - S',
+        'BONITETE - D',
+        'BONITETE - B',
+        'BONITETE - O',
+        // TOČKE - individual fields
+        'TOČKE - S',
+        'TOČKE - D',
+        'TOČKE - B',
+        // DALJICE - individual fields
+        'DALJICE - S',
+        'DALJICE - D',
+        'DALJICE - B',
+        // PARCELE - individual fields
+        'PARCELE - N',
+        'PARCELE - S',
+        'PARCELE - D',
+        'PARCELE - B',
+        // STAVBE - individual fields
+        'STAVBE - N',
+        'STAVBE - S',
+        'STAVBE - D',
+        'STAVBE - B',
+        // DELI STAVBE - individual fields
+        'DELI STAVBE - N',
+        'DELI STAVBE - S',
+        'DELI STAVBE - D',
+        'DELI STAVBE - B',
+        // ETAZA - individual fields
+        'ETAZA - N',
+        'ETAZA - S',
+        'ETAZA - D',
+        'ETAZA - B',
+        // PROSTORI - individual fields
+        'PROSTORI - N',
+        'PROSTORI - S',
+        'PROSTORI - D',
+        'PROSTORI - B',
+        // SESTAVINE DELOV STAVB - individual fields
+        'SESTAVINE DELOV STAVB - N',
+        'SESTAVINE DELOV STAVB - S',
+        'SESTAVINE DELOV STAVB - D',
+        'SESTAVINE DELOV STAVB - B',
+        // TOCKE MERITEV - individual fields
+        'TOCKE MERITEV - S',
+        'TOCKE MERITEV - D',
+        'TOCKE MERITEV - B',
+        // Metadata fields
         'ProcessedIdentifier',
         'ProcessedDate'
       ];
@@ -85,7 +128,7 @@ function Export() {
           }
         }
       } catch (err) {
-        console.log("No existing file found or error reading file, creating new file", err);
+        alert("No existing file found or error reading file, creating new file", err);
       }
       
       // Process each XML's data
@@ -102,7 +145,7 @@ function Export() {
           return;
         }
         
-        // Add the row data with proper handling of numeric values
+        // Add the row data with proper handling of numeric values and individual fields
         const row = {
           'File Name': data.fileName || '',
           'Data Types': data.dataTypes || '',
@@ -116,17 +159,59 @@ function Export() {
           'Seznam vseh parcel': data.allParcelsInKP || '',
           'Seznam vseh stavb': data.allStavbe || '',
           'Seznam vseh bonitet': data.allBonitete || '',
-          'OBMOCJE': data.obmocje || 'S: 0, D: 0, B: 0',
-          'BONITETE': data.bonitete || 'S: 0, D: 0, B: 0, O: 0',
-          'TOČKE': data.tocke || 'S: 0, D: 0, B: 0',
-          'DALJICE': data.daljice || 'S: 0, D: 0, B: 0',
-          'PARCELE': data.parcele || 'N: 0, S: 0, D: 0, B: 0',
-          'STAVBE': data.stavbe || 'N: 0, S: 0, D: 0, B: 0',
-          'DELI STAVBE': data.deliStavb || 'N: 0, S: 0, D: 0, B: 0',
-          'ETAZA': data.etaza || 'N: 0, S: 0, D: 0, B: 0',
-          'PROSTORI': data.prostori || 'N: 0, S: 0, D: 0, B: 0',
-          'SESTAVINE DELOV STAVB': data.sestavineDelovStavb || 'N: 0, S: 0, D: 0, B: 0',
-          'TOCKE MERITEV': data.tockeMeritev || 'S: 0, D: 0, B: 0',
+          
+          // Individual fields for each category
+          'OBMOCJE - S': ensureNumericValue(data.obmocjeSppSpre),
+          'OBMOCJE - D': ensureNumericValue(data.obmocjeSppDodan),
+          'OBMOCJE - B': ensureNumericValue(data.obmocjeSppDel),
+          
+          'BONITETE - S': ensureNumericValue(data.bonitetaSpr),
+          'BONITETE - D': ensureNumericValue(data.bonitetaDodanih),
+          'BONITETE - B': ensureNumericValue(data.bonitetaDel), 
+          'BONITETE - O': ensureNumericValue(data.bonitetaO),
+          
+          'TOČKE - S': ensureNumericValue(data.tockeS),
+          'TOČKE - D': ensureNumericValue(data.tockeD),
+          'TOČKE - B': ensureNumericValue(data.tockeB),
+          
+          'DALJICE - S': ensureNumericValue(data.daljiceS),
+          'DALJICE - D': ensureNumericValue(data.daljiceD),
+          'DALJICE - B': ensureNumericValue(data.daljiceB),
+          
+          'PARCELE - N': ensureNumericValue(data.parceleN),
+          'PARCELE - S': ensureNumericValue(data.parceleS),
+          'PARCELE - D': ensureNumericValue(data.parceleD),
+          'PARCELE - B': ensureNumericValue(data.parceleB),
+          
+          'STAVBE - N': ensureNumericValue(data.stavbeN),
+          'STAVBE - S': ensureNumericValue(data.stavbeS),
+          'STAVBE - D': ensureNumericValue(data.stavbeD),
+          'STAVBE - B': ensureNumericValue(data.stavbeB),
+          
+          'DELI STAVBE - N': ensureNumericValue(data.deliStavbN),
+          'DELI STAVBE - S': ensureNumericValue(data.deliStavbS),
+          'DELI STAVBE - D': ensureNumericValue(data.deliStavbD),
+          'DELI STAVBE - B': ensureNumericValue(data.deliStavbB),
+          
+          'ETAZA - N': ensureNumericValue(data.etazaN),
+          'ETAZA - S': ensureNumericValue(data.etazaS),
+          'ETAZA - D': ensureNumericValue(data.etazaD),
+          'ETAZA - B': ensureNumericValue(data.etazaB),
+          
+          'PROSTORI - N': ensureNumericValue(data.prostoriN),
+          'PROSTORI - S': ensureNumericValue(data.prostoriS),
+          'PROSTORI - D': ensureNumericValue(data.prostoriD),
+          'PROSTORI - B': ensureNumericValue(data.prostoriB),
+          
+          'SESTAVINE DELOV STAVB - N': ensureNumericValue(data.sestavineDelovStavbN),
+          'SESTAVINE DELOV STAVB - S': ensureNumericValue(data.sestavineDelovStavbS),
+          'SESTAVINE DELOV STAVB - D': ensureNumericValue(data.sestavineDelovStavbD),
+          'SESTAVINE DELOV STAVB - B': ensureNumericValue(data.sestavineDelovStavbB),
+          
+          'TOCKE MERITEV - S': ensureNumericValue(data.tockeMeritevS),
+          'TOCKE MERITEV - D': ensureNumericValue(data.tockeMeritevD),
+          'TOCKE MERITEV - B': ensureNumericValue(data.tockeMeritevB),
+          
           'ProcessedIdentifier': xmlIdentifier,
           'ProcessedDate': new Date().toISOString()
         };

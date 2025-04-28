@@ -32,48 +32,74 @@ export const XmlProvider = ({ children }) => {
   const formatDataForExport = () => {
     if (formData.length === 0) return '';
     
+    // Create headers for all the individual fields
+    const allFields = [
+      'fileName',
+      'dataTypes',
+      'pooblascenecId',
+      'numKP',
+      'vrstaKatPos',
+      'parcelCount',
+      'buildingCount',
+      'buildingPartCount',
+      'boniteta',
+      'allParcelsInKP',
+      'allStavbe',
+      'allBonitete',
+      'obmocjeSppSpre',
+      'obmocjeSppDodan',
+      'obmocjeSppDel',
+      'bonitetaSpr',
+      'bonitetaDodanih',
+      'bonitetaDel',
+      'bonitetaO',
+      'tockeS',
+      'tockeD',
+      'tockeB',
+      'daljiceS',
+      'daljiceD',
+      'daljiceB',
+      'parceleN',
+      'parceleS',
+      'parceleD',
+      'parceleB',
+      'stavbeN',
+      'stavbeS',
+      'stavbeD',
+      'stavbeB',
+      'deliStavbN',
+      'deliStavbS',
+      'deliStavbD',
+      'deliStavbB',
+      'etazaN',
+      'etazaS',
+      'etazaD',
+      'etazaB',
+      'prostoriN',
+      'prostoriS',
+      'prostoriD',
+      'prostoriB',
+      'sestavineDelovStavbN',
+      'sestavineDelovStavbS',
+      'sestavineDelovStavbD',
+      'sestavineDelovStavbB',
+      'tockeMeritevS',
+      'tockeMeritevD',
+      'tockeMeritevB'
+    ];
+    
     // Create a formatted string of all form data
     const formattedLines = formData.map(form => {
       if (!form) return '';
       
       // Format each piece of data with its label
-      const entries = Object.entries(form).map(([key, value]) => {
-        // Skip fileName since it's handled separately
-        if (key === 'fileName') return null;
-        
-        // Format the label based on key
-        let label;
-        switch(key) {
-          case 'dataTypes': label = 'Found data types'; break;
-          case 'pooblascenecId': label = 'Pooblaščenec ID'; break;
-          case 'numKP': label = 'Število katastrskih postopkov'; break;
-          case 'vrstaKatPos': label = 'VrstaKatPos'; break;
-          case 'parcelCount': label = 'Število sestavin parcel'; break;
-          case 'buildingCount': label = 'Število sestavin stavb'; break;
-          case 'buildingPartCount': label = 'Število sestavin delov stavb'; break;
-          case 'boniteta': label = 'Število sestavin bonitet'; break;
-          case 'allParcelsInKP': label = 'Seznam vseh parcel'; break;
-          case 'allStavbe': label = 'Seznam vseh stavb'; break;
-          case 'allBonitete': label = 'Seznam vseh bonitet'; break;
-          case 'obmocje': label = 'OBMOCJE'; break;
-          case 'bonitete': label = 'BONITETE'; break;
-          case 'tocke': label = 'TOČKE'; break;
-          case 'daljice': label = 'DALJICE'; break;
-          case 'parcele': label = 'PARCELE'; break;
-          case 'stavbe': label = 'STAVBE'; break;
-          case 'deliStavb': label = 'DELI STAVBE'; break;
-          case 'etaza': label = 'ETAZA'; break;
-          case 'prostori': label = 'PROSTORI'; break;
-          case 'sestavineDelovStavb': label = 'SESTAVINE DELOV STAVB'; break;
-          case 'tockeMeritev': label = 'TOCKE MERITEV'; break;
-          default: label = key;
-        }
-        
-        return `${label}: ${value}`;
-      }).filter(Boolean); // Remove null entries
+      const entries = allFields.map(key => {
+        if (!form[key] && form[key] !== 0) return `${key}: `;
+        return `${key}: ${form[key]}`;
+      });
       
-      // Create the line with fileName at the beginning and the rest separated by semicolons
-      return `${form.fileName || 'Unknown File'}; ${entries.join('; ')}`;
+      // Create the line with all entries separated by semicolons
+      return entries.join('; ');
     });
     
     return formattedLines.join('\n');
@@ -96,7 +122,7 @@ export const XmlProvider = ({ children }) => {
         updateExtractedDataForXml,
         currentXmlIndex,
         setCurrentXmlIndex,
-        formatDataForExport, // Add the new function
+        formatDataForExport,
       }}
     >
       {children}
